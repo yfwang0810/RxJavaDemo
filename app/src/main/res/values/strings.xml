@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">RxJavaDemo</string>
+    <string name="oauth_expired">用户信息过期，请重新登录</string>
+</resources>
