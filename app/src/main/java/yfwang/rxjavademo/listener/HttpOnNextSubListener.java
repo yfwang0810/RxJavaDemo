@@ -1,6 +1,7 @@
 package yfwang.rxjavademo.listener;
 
-import java.util.Observable;
+
+import rx.Observable;
 
 /**
  * Description: Subscriber回调
@@ -14,5 +15,5 @@ public interface HttpOnNextSubListener {
      * @param observable
      * @param method
      */
-      void OnNext(Observable observable,String method);
+      void OnNext(Observable observable, String method);
 }

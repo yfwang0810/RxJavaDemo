@@ -24,6 +24,17 @@ public abstract class BaseApi {
     /*retry叠加延迟*/
     private long retryIncreaseDelay = 100;
 
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    /*方法-如果需要缓存必须设置这个参数；不需要不用設置*/
+    private String method="";
+
     public int getRetryCount() {
         return retryCount;
     }
