@@ -28,6 +28,20 @@ public abstract class BaseApi {
     private long retryDelay = 100;
     /*retry叠加延迟*/
     private long retryIncreaseDelay = 100;
+    /*时候缓存数据*/
+    private boolean isCache;
+    /*方法-如果需要缓存必须设置这个参数；不需要不用設置*/
+    private String method = "";
+
+
+    public boolean isCache() {
+        return isCache;
+    }
+
+    public void setCache(boolean cache) {
+        isCache = cache;
+    }
+
 
     public String getMethod() {
         return method;
@@ -37,8 +51,7 @@ public abstract class BaseApi {
         this.method = method;
     }
 
-    /*方法-如果需要缓存必须设置这个参数；不需要不用設置*/
-    private String method="";
+
 
     public int getRetryCount() {
         return retryCount;
@@ -63,6 +76,11 @@ public abstract class BaseApi {
     public void setRetryIncreaseDelay(long retryIncreaseDelay) {
         this.retryIncreaseDelay = retryIncreaseDelay;
     }
+
+    public String getUrl(){
+        return getBaseUrl()+getMethod();
+    }
+
 
     public String getBaseUrl() {
         return baseUrl;
@@ -96,6 +114,7 @@ public abstract class BaseApi {
     public void setShowProgress(boolean showProgress) {
         this.showProgress = showProgress;
     }
+
     /**
      * 设置参数
      *

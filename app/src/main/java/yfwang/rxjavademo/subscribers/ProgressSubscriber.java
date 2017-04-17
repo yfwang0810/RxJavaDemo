@@ -8,7 +8,9 @@ import java.lang.ref.SoftReference;
 
 import rx.Subscriber;
 import yfwang.rxjavademo.base.BaseApi;
+import yfwang.rxjavademo.global.MobileApplication;
 import yfwang.rxjavademo.listener.HttpOnNextListener;
+import yfwang.rxjavademo.utils.AppUtil;
 
 /**
  * Description: 自定义progress
@@ -46,7 +48,9 @@ public class ProgressSubscriber<T> extends Subscriber<T> {
             initProgressDialog(api.isCancel());
         }
     }
-
+    /**
+     * 初始化加载框
+     */
     private void initProgressDialog(boolean cancel) {
 
         Context context = mActivity.get();
@@ -66,13 +70,53 @@ public class ProgressSubscriber<T> extends Subscriber<T> {
 
     }
 
+    /**
+     * 显示加载框
+     */
+    public void showProgressDialog() {
 
-    @Override
-    public void onStart() {
-        super.onStart();
+        if (progressDialog != null && !progressDialog.isShowing()) {
+            progressDialog.show();
+        }
 
     }
 
+
+    /**
+     * 隐藏
+     */
+    private void dismissProgressDialog() {
+        if (!isShowPorgress()) return;
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
+
+
+
+    /**
+     * 订阅开始时调用
+     * 显示ProgressDialog
+     */
+    @Override
+    public void onStart() {
+        showProgressDialog();
+        /*缓存并且有网*/
+        if (api.isCache() && AppUtil.isNetworkAvailable(MobileApplication.getInstance())) {
+             /*获取缓存数据*/
+//            CookieResulte cookieResulte = CookieDbUtil.getInstance().queryCookieBy(api.getUrl());
+//            if (cookieResulte != null) {
+//                long time = (System.currentTimeMillis() - cookieResulte.getTime()) / 1000;
+//                if (time < api.getCookieNetWorkTime()) {
+//                    if (mSubscriberOnNextListener.get() != null) {
+//                        mSubscriberOnNextListener.get().onNext(cookieResulte.getResulte(), api.getMethod());
+//                    }
+//                    onCompleted();
+//                    unsubscribe();
+//                }
+//            }
+        }
+    }
     @Override
     public void onCompleted() {
 

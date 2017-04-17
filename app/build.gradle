@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao' // apply plugin
 
 android {
     compileSdkVersion 25
@@ -18,6 +19,11 @@ android {
         }
     }
 }
+    greendao {
+        schemaVersion 1
+        daoPackage 'com.anye.greendao.gen'
+        targetGenDir 'src/main/java'
+    }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -34,4 +40,5 @@ dependencies {
     compile 'com.squareup.retrofit2:adapter-rxjava:+'
     compile 'com.google.code.gson:gson:+'
     compile 'com.squareup.retrofit2:converter-scalars:2.0.0'
+    compile 'org.greenrobot:greendao:3.2.2'
 }
