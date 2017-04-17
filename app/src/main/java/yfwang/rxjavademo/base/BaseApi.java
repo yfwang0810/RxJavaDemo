@@ -11,6 +11,11 @@ import rx.Observable;
  */
 public abstract class BaseApi {
 
+
+    /*是否能取消加载框*/
+    private boolean cancel = false;
+    /*是否显示加载框*/
+    private boolean showProgress = true;
     /*超时时间-默认6秒*/
     private int connectionTime = 6;
 
@@ -76,7 +81,21 @@ public abstract class BaseApi {
         this.connectionTime = connectionTime;
     }
 
+    public boolean isCancel() {
+        return cancel;
+    }
 
+    public void setCancel(boolean cancel) {
+        this.cancel = cancel;
+    }
+
+    public boolean isShowProgress() {
+        return showProgress;
+    }
+
+    public void setShowProgress(boolean showProgress) {
+        this.showProgress = showProgress;
+    }
     /**
      * 设置参数
      *
