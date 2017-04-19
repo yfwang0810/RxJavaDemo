@@ -19,6 +19,7 @@ import yfwang.rxjavademo.exception.ResulteFun;
 import yfwang.rxjavademo.exception.RetryWhenNetworkException;
 import yfwang.rxjavademo.listener.HttpOnNextListener;
 import yfwang.rxjavademo.listener.HttpOnNextSubListener;
+import yfwang.rxjavademo.subscribers.ProgressSubscriber;
 
 /**
  * Description: 网络请求管理类
@@ -81,6 +82,9 @@ public class HttpManager {
 
         /*数据String回调*/
          if (onNextListener!=null&&onNextListener.get()!=null){
+             ProgressSubscriber progressSubscriber = new ProgressSubscriber(api, onNextListener, appCompatActivity);
+
+             observable.subscribe(progressSubscriber);
 
 
 
