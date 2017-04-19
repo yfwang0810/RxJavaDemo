@@ -32,6 +32,29 @@ public abstract class BaseApi {
     private boolean isCache;
     /*方法-如果需要缓存必须设置这个参数；不需要不用設置*/
     private String method = "";
+    /*无网络的情况下本地缓存时间默认30天*/
+    private int cookieNoNetWorkTime = 24 * 60 * 60 * 30;
+    /*有网情况下的本地缓存时间默认60秒*/
+    private int cookieNetWorkTime = 60;
+
+
+    public int getCookieNetWorkTime() {
+        return cookieNetWorkTime;
+    }
+
+    public void setCookieNetWorkTime(int cookieNetWorkTime) {
+        this.cookieNetWorkTime = cookieNetWorkTime;
+    }
+
+
+
+    public int getCookieNoNetWorkTime() {
+        return cookieNoNetWorkTime;
+    }
+
+    public void setCookieNoNetWorkTime(int cookieNoNetWorkTime) {
+        this.cookieNoNetWorkTime = cookieNoNetWorkTime;
+    }
 
 
     public boolean isCache() {

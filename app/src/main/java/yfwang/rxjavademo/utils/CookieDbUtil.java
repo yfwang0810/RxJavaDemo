@@ -3,9 +3,16 @@ package yfwang.rxjavademo.utils;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.anye.greendao.gen.CookieResulteDao;
 import com.anye.greendao.gen.DaoMaster;
+import com.anye.greendao.gen.DaoSession;
+
+import org.greenrobot.greendao.query.QueryBuilder;
+
+import java.util.List;
 
 import yfwang.rxjavademo.global.MobileApplication;
+import yfwang.rxjavademo.http.CookieResulte;
 
 /**
  * Description: 缓存数据 数据库操作类
@@ -64,7 +71,49 @@ public class CookieDbUtil {
     }
 
 
+    public void saveCookie(CookieResulte info){
+        DaoMaster daoMaster = new DaoMaster(getWritableDatabase());
+        DaoSession daoSession = daoMaster.newSession();
+        CookieResulteDao downInfoDao = daoSession.getCookieResulteDao();
+        downInfoDao.insert(info);
+    }
 
+    public void updateCookie(CookieResulte info){
+        DaoMaster daoMaster = new DaoMaster(getWritableDatabase());
+        DaoSession daoSession = daoMaster.newSession();
+        CookieResulteDao downInfoDao = daoSession.getCookieResulteDao();
+        downInfoDao.update(info);
+    }
+
+    public void deleteCookie(CookieResulte info){
+        DaoMaster daoMaster = new DaoMaster(getWritableDatabase());
+        DaoSession daoSession = daoMaster.newSession();
+        CookieResulteDao downInfoDao = daoSession.getCookieResulteDao();
+        downInfoDao.delete(info);
+    }
+
+
+    public CookieResulte queryCookieBy(String  url) {
+        DaoMaster daoMaster = new DaoMaster(getReadableDatabase());
+        DaoSession daoSession = daoMaster.newSession();
+        CookieResulteDao downInfoDao = daoSession.getCookieResulteDao();
+        QueryBuilder<CookieResulte> qb = downInfoDao.queryBuilder();
+        qb.where(CookieResulteDao.Properties.Url.eq(url));
+        List<CookieResulte> list = qb.list();
+        if(list.isEmpty()){
+            return null;
+        }else{
+            return list.get(0);
+        }
+    }
+
+    public List<CookieResulte> queryCookieAll() {
+        DaoMaster daoMaster = new DaoMaster(getReadableDatabase());
+        DaoSession daoSession = daoMaster.newSession();
+        CookieResulteDao downInfoDao = daoSession.getCookieResulteDao();
+        QueryBuilder<CookieResulte> qb = downInfoDao.queryBuilder();
+        return qb.list();
+    }
 
 
 }

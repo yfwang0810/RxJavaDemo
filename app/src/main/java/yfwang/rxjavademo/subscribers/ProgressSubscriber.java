@@ -3,14 +3,21 @@ package yfwang.rxjavademo.subscribers;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.widget.Toast;
 
 import java.lang.ref.SoftReference;
 
+import rx.Observable;
 import rx.Subscriber;
 import yfwang.rxjavademo.base.BaseApi;
+import yfwang.rxjavademo.exception.ApiException;
+import yfwang.rxjavademo.exception.CodeException;
+import yfwang.rxjavademo.exception.HttpTimeException;
 import yfwang.rxjavademo.global.MobileApplication;
+import yfwang.rxjavademo.http.CookieResulte;
 import yfwang.rxjavademo.listener.HttpOnNextListener;
 import yfwang.rxjavademo.utils.AppUtil;
+import yfwang.rxjavademo.utils.CookieDbUtil;
 
 /**
  * Description: 自定义progress
@@ -104,32 +111,120 @@ public class ProgressSubscriber<T> extends Subscriber<T> {
         /*缓存并且有网*/
         if (api.isCache() && AppUtil.isNetworkAvailable(MobileApplication.getInstance())) {
              /*获取缓存数据*/
-//            CookieResulte cookieResulte = CookieDbUtil.getInstance().queryCookieBy(api.getUrl());
-//            if (cookieResulte != null) {
-//                long time = (System.currentTimeMillis() - cookieResulte.getTime()) / 1000;
-//                if (time < api.getCookieNetWorkTime()) {
-//                    if (mSubscriberOnNextListener.get() != null) {
-//                        mSubscriberOnNextListener.get().onNext(cookieResulte.getResulte(), api.getMethod());
-//                    }
-//                    onCompleted();
-//                    unsubscribe();
-//                }
-//            }
+            CookieResulte cookieResulte = CookieDbUtil.getInstance().queryCookieBy(api.getUrl());
+            if (cookieResulte != null) {
+                long time = (System.currentTimeMillis() - cookieResulte.getTime()) / 1000;
+                if (time < api.getCookieNetWorkTime()) {
+                    if (mSubscriberOnNextListener.get() != null) {
+                        mSubscriberOnNextListener.get().onNext(cookieResulte.getResulte(), api.getMethod());
+                    }
+                    onCompleted();
+                    unsubscribe();
+                }
+            }
         }
     }
     @Override
     public void onCompleted() {
-
+        dismissProgressDialog();
     }
 
     @Override
     public void onError(Throwable e) {
+           /*需要緩存并且本地有缓存才返回*/
+        if (api.isCache()) {
+            getCache();
+        } else {
+            errorDo(e);
+        }
+        dismissProgressDialog();
+    }
+
+    /**
+     * 错误统一处理
+     *
+     * @param e
+     */
+    private void errorDo(Throwable e) {
+        Context context = mActivity.get();
+        if (context == null) return;
+        HttpOnNextListener httpOnNextListener = mSubscriberOnNextListener.get();
+        if (httpOnNextListener == null) return;
+        if (e instanceof ApiException) {
+            httpOnNextListener.onFail((ApiException) e);
+        } else if (e instanceof HttpTimeException) {
+            HttpTimeException exception = (HttpTimeException) e;
+            httpOnNextListener.onFail(new ApiException(exception, CodeException.RUNTIME_ERROR, exception.getMessage()));
+        } else {
+            httpOnNextListener.onFail(new ApiException(e, CodeException.UNKNOWN_ERROR, e.getMessage()));
+        }
+        /*可以在这里统一处理错误处理-可自由扩展*/
+        Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+
 
     }
 
+    /**
+     * 获取缓存数据
+     */
+    private void getCache() {
+        Observable.just(api.getUrl()).subscribe(new Subscriber<String>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                errorDo(e);
+            }
+
+            @Override
+            public void onNext(String s) {
+                CookieResulte resulte = CookieDbUtil.getInstance().queryCookieBy(s);
+                if (resulte == null) {
+                    throw new HttpTimeException(HttpTimeException.NO_CHACHE_ERROR);
+                }
+                long time = (System.currentTimeMillis() - resulte.getTime()) / 1000;
+                if (time < api.getCookieNoNetWorkTime()) {
+                    if (mSubscriberOnNextListener.get() != null) {
+                        mSubscriberOnNextListener.get().onNext(resulte.getResulte(), api.getMethod());
+                    }
+                } else {
+                    CookieDbUtil.getInstance().deleteCookie(resulte);
+                    throw new HttpTimeException(HttpTimeException.CHACHE_TIMEOUT_ERROR);
+                }
+            }
+        });
+
+
+    }
+
+    /**
+     * 将onNext方法中的返回结果交给Activity或Fragment自己处理
+     *
+     * @param t 创建Subscriber时的泛型类型
+     */
     @Override
     public void onNext(T t) {
 
+          /*缓存处理*/
+        if (api.isCache()) {
+            CookieResulte resulte = CookieDbUtil.getInstance().queryCookieBy(api.getUrl());
+            long time = System.currentTimeMillis();
+            /*保存和更新本地数据*/
+            if (resulte == null) {
+                resulte = new CookieResulte(api.getUrl(), t.toString(), time);
+                CookieDbUtil.getInstance().saveCookie(resulte);
+            } else {
+                resulte.setResulte(t.toString());
+                resulte.setTime(time);
+                CookieDbUtil.getInstance().updateCookie(resulte);
+            }
+        }
+        if (mSubscriberOnNextListener.get() != null) {
+            mSubscriberOnNextListener.get().onNext((String) t, api.getMethod());
+        }
 
     }
 
